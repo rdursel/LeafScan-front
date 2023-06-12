@@ -3,6 +3,9 @@ import streamlit as st
 import requests
 import cv2
 import numpy as np
+from PIL import Image
+import io
+
 # Define the base URI of the API
 #   - Potential sources are in `.streamlit/secrets.toml` or in the Secrets section
 #     on Streamlit Cloud
@@ -27,16 +30,25 @@ st.markdown("Now, the rest is up to you. Start creating your page.")
 uploaded_file = st.file_uploader("Choose a image file", type="jpg")
 
 if uploaded_file is not None:
-    # Convert the file to an opencv image.
-    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
-    opencv_image = cv2.imdecode(file_bytes, 1)
+    image = Image.open(uploaded_file)
+    st.image(image, caption='Uploaded Image.', use_column_width=True)
 
-    # Now do something with the image! For example, let's display it:
-    st.image(opencv_image, channels="BGR")
+     # convert the PIL image to byte array
+    image_bytes = io.BytesIO()
+    image.save(image_bytes, format='JPEG')
+    image_bytes = image_bytes.getvalue()
 
-    myobj = {'img': opencv_image, 'Content-Type': 'multipart/form-data'}
-    x = requests.post(url, data = myobj)
-    st.write(x)
+    st.write("Sending image to the API...")
+
+    # Use 'rb' if you get an error about 'bytes-like object is required, not str'
+    response = requests.post(url, files={'img': image_bytes})
+
+    # Assuming the API responds with JSON
+    if response.status_code == 200:
+        st.write("Successfully sent to the API!")
+        st.write(response.json())
+    else:
+        st.write("Failed to send the image to the API.")
 
 
 # TODO: Add some titles, introduction, ...
