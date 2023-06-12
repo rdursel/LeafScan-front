@@ -1,7 +1,8 @@
 import os
 import streamlit as st
-
-
+import requests
+import cv2
+import numpy as np
 # Define the base URI of the API
 #   - Potential sources are in `.streamlit/secrets.toml` or in the Secrets section
 #     on Streamlit Cloud
@@ -22,6 +23,22 @@ st.markdown(f"Working with {url}")
 st.markdown("Now, the rest is up to you. Start creating your page.")
 
 
+
+uploaded_file = st.file_uploader("Choose a image file", type="jpg")
+
+if uploaded_file is not None:
+    # Convert the file to an opencv image.
+    file_bytes = np.asarray(bytearray(uploaded_file.read()), dtype=np.uint8)
+    opencv_image = cv2.imdecode(file_bytes, 1)
+
+    # Now do something with the image! For example, let's display it:
+    st.image(opencv_image, channels="BGR")
+
+    myobj = {'img': opencv_image, 'Content-Type': 'multipart/form-data'}
+    x = requests.post(url, data = myobj)
+    st.write(x)
+
+
 # TODO: Add some titles, introduction, ...
 
 
@@ -40,6 +57,7 @@ st.markdown("Now, the rest is up to you. Start creating your page.")
 
 
 # TODO: display the prediction in some fancy way to the user
+
 
 
 # TODO: [OPTIONAL] maybe you can add some other pages?
