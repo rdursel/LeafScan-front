@@ -11,6 +11,18 @@ import time
 
 
 
+green_background = """
+<style>
+body {
+    background-color: lightgreen;
+}
+</style>
+"""
+# Afficher le fond vert pâle à l'aide de st.markdown()
+st.markdown(green_background, unsafe_allow_html=True)
+
+
+
 # Define the base URI of the API
 #   - Potential sources are in `.streamlit/secrets.toml` or in the Secrets section
 #     on Streamlit Cloud
@@ -25,11 +37,8 @@ BASE_URI = BASE_URI if BASE_URI.endswith('/') else BASE_URI + '/'
 # Define the url to be used by requests.get to get a prediction (adapt if needed)
 
 url = BASE_URI + 'predict'
-OPENAI_API_KEY=st.secrets['OPENAI_API_KEY']
 
-# Just displaying the source for the API. Remove this in your final version.
-st.markdown(f"Working with {url}")
-st.markdown("Now, the rest is up to you. Start creating your page.")
+OPENAI_API_KEY=st.secrets['OPENAI_API_KEY']
 
 
 def validate_result(api_result,threshold=0.7):
@@ -40,7 +49,7 @@ def validate_result(api_result,threshold=0.7):
         return False
     else:
         return True
-
+ 
 def chat_with_chatgpt(prompt, model="text-davinci-003"):
     response = openai.Completion.create(
         engine=model,
@@ -76,43 +85,52 @@ def loading_message():
 
    return None
 
+left_column, right_column = st.columns(2)
 
+# Côté gauche (Drag and Drop)
+with left_column:
+    # Titre en vert
+    st.title('LeafScan')
+    st.markdown('<style>h1{color: green;}</style>', unsafe_allow_html=True)
+    # Section Drag and Drop
+    st.header('Drag and Drop')
 
+    uploaded_files = st.file_uploader("Choose image files", accept_multiple_files=True, type="jpg")
+    ask_chatGPT = st.checkbox("I'd like to receive chatGPT advice")
+                          
+    if uploaded_files is not None:
+        for uploaded_file in uploaded_files:
+            st.write("File:", uploaded_file.name)
 
-uploaded_file = st.file_uploader("Choose a image file", type=['jpg'], accept_multiple_files=True)
-ask_chatGPT = st.checkbox("I'd like to receive chatGPT advice")
+# Côté droit (Prédictions et images)
+with right_column:
+    # Titre des prédictions
+    st.header('Predictions')  
+    uploaded_file = st.file_uploader("Choose a image file", type=['jpg'], accept_multiple_files=True)
+    if uploaded_file is not None:
+        for upld in uploaded_file:
+            image = Image.open(upld)
+            st.image(image, caption='Uploaded Image.', width=200)
 
-if uploaded_file is not None:
-    for upld in uploaded_file:
-        image = Image.open(upld)
-        st.image(image, caption='Uploaded Image.', width=200)
+            # convert the PIL image to byte array
+            image_bytes = io.BytesIO()
+            image.save(image_bytes, format='JPEG')
+            image_bytes = image_bytes.getvalue()
 
-        # convert the PIL image to byte array
-        image_bytes = io.BytesIO()
-        image.save(image_bytes, format='JPEG')
-        image_bytes = image_bytes.getvalue()
+            #st.write("Sending image to the API...")
 
-        #st.write("Sending image to the API...")
+            # Use 'rb' if you get an error about 'bytes-like object is required, not str'
+            response = requests.post(url, files={'img': image_bytes})
 
-        # Use 'rb' if you get an error about 'bytes-like object is required, not str'
-        response = requests.post(url, files={'img': image_bytes})
-
-        # Assuming the API responds with JSON
-        if response.status_code == 200:
-            loading_message()
-            #st.write("Successfully sent to the API!")
-            st.write(response.json())
-            #st.write(response.json()[0])
-            #data = json.load(response.json())
-            #print(data)
-            st.write("3 main probabilites are : ")
-            for lm in range(len(response.json())):
-                for k, v in response.json()[lm].items():
-                    #print( k, v)
-                    if ask_chatGPT:
-                        st.write('Asking to chatGPT : what are the 3 main actions to do against ' + k )
-                        st.write( chat_with_chatgpt("what are the 3 main actions to do against " + k+" disease ?"))
-
-
-        else:
-            st.write("Failed to send the image to the API.")
+            # Assuming the API responds with JSON
+            if response.status_code == 200:
+                loading_message()
+                st.write(response.json())
+                st.write("3 main probabilites are : ")
+                for lm in range(len(response.json())):
+                    for k, v in response.json()[lm].items():
+                        if ask_chatGPT:
+                            st.write('Asking to chatGPT : what are the 3 main actions to do against ' + k )
+                            st.write( chat_with_chatgpt("what are the 3 main actions to do against " + k+" disease ?"))
+            else:
+                st.write("Failed to send the image to the API.")
