@@ -6,6 +6,18 @@ import numpy as np
 from PIL import Image
 import io
 
+green_background = """
+<style>
+body {
+    background-color: lightgreen;
+}
+</style>
+"""
+# Afficher le fond vert pâle à l'aide de st.markdown()
+st.markdown(green_background, unsafe_allow_html=True)
+
+
+
 # Define the base URI of the API
 #   - Potential sources are in `.streamlit/secrets.toml` or in the Secrets section
 #     on Streamlit Cloud
@@ -19,36 +31,48 @@ else:
 BASE_URI = BASE_URI if BASE_URI.endswith('/') else BASE_URI + '/'
 # Define the url to be used by requests.get to get a prediction (adapt if needed)
 url = BASE_URI + 'predict'
+left_column, right_column = st.columns(2)
 
-# Just displaying the source for the API. Remove this in your final version.
-st.markdown(f"Working with {url}")
+# Côté gauche (Drag and Drop)
+with left_column:
+    # Titre en vert
+    st.title('LeafScan')
+    st.markdown('<style>h1{color: green;}</style>', unsafe_allow_html=True)
+    # Section Drag and Drop
+    st.header('Drag and Drop')
 
-st.markdown("Now, the rest is up to you. Start creating your page.")
+    uploaded_files = st.file_uploader("Choose image files", accept_multiple_files=True, type="jpg")
 
+    if uploaded_files is not None:
+        for uploaded_file in uploaded_files:
+            st.write("File:", uploaded_file.name)
 
+# Côté droit (Prédictions et images)
+with right_column:
+    # Titre des prédictions
+    st.header('Predictions')
 
-uploaded_file = st.file_uploader("Choose a image file", type="jpg")
+    if uploaded_files is not None:
+        for uploaded_file in uploaded_files:
+            image = Image.open(uploaded_file)
+            st.image(image, caption='Uploaded Image.', use_column_width=True)
 
-if uploaded_file is not None:
-    image = Image.open(uploaded_file)
-    st.image(image, caption='Uploaded Image.', use_column_width=True)
+            # Convertir l'image PIL en tableau d'octets
+            image_bytes = io.BytesIO()
+            image.save(image_bytes, format='JPEG')
+            image_bytes = image_bytes.getvalue()
 
-     # convert the PIL image to byte array
-    image_bytes = io.BytesIO()
-    image.save(image_bytes, format='JPEG')
-    image_bytes = image_bytes.getvalue()
+            st.write("Sending image to the API...")
 
-    st.write("Sending image to the API...")
+            # Utiliser 'rb' si vous obtenez une erreur indiquant 'bytes-like object is required, not str'
+            response = requests.post(url, files={'img': image_bytes})
 
-    # Use 'rb' if you get an error about 'bytes-like object is required, not str'
-    response = requests.post(url, files={'img': image_bytes})
-
-    # Assuming the API responds with JSON
-    if response.status_code == 200:
-        st.write("Successfully sent to the API!")
-        st.write(response.json())
-    else:
-        st.write("Failed to send the image to the API.")
+            # Supposant que l'API répond avec JSON
+            if response.status_code == 200:
+                st.write("Successfully sent to the API!")
+                st.write(response.json())
+            else:
+                st.write("Failed to send the image to the API.")
 
 
 # TODO: Add some titles, introduction, ...
