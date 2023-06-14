@@ -10,7 +10,7 @@ Pillow
 requires.io
 openai
 pathlib
-base64
+pybase64
 
 
 # If you want to display datasets, or if your API returns you dataframes,
@@ -20,4 +20,4 @@ base64
 # pandas
 
 #Image
-opencv-python
+opencv-python-headless
