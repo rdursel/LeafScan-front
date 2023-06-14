@@ -1,11 +1,5 @@
-import csv
+
 result={}
-
-#Load the CSV file
-with open('../LeafScan-back/leafscan/diseases.txt', 'r') as data:
-    csvreader = csv.reader(data, delimiter=';')
-    d = {rows[0].strip():rows[1].strip() for rows in csvreader}
-
 def disease_info(disease_name):
     data_dict = {
     'Apple Apple Scab': 'https://www.planetnatural.com/pest-problem-solver/plant-disease/apple-scab/',
@@ -48,5 +42,3 @@ def disease_info(disease_name):
     'Tomato healthy': ''
 }
     return data_dict[disease_name]
-
-print(disease_info('Apple Cedar apple rust'))
