@@ -11,6 +11,7 @@ import time
 from pathlib import Path
 import base64
 
+
 #load variables
 BASE_URI = st.secrets['cloud_api_uri']
 url = BASE_URI + '/predict'
@@ -70,6 +71,16 @@ def loading_message():
             'Be patient, it \' coming.... :)',
             'DONE !'
         ]
+
+    st.markdown(
+    """
+    <style>
+        .stProgress > div > div > div > div {
+            background-color: #40916C;
+        }
+    </style>""",
+    unsafe_allow_html=True,
+    )
 
     my_bar = st.progress(0, text=message_list[0])
 
