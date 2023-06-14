@@ -26,13 +26,18 @@ def validate_result(api_result,threshold=70):
     This function ensure a minimal score and print result
     '''
     first_category = list(api_result.keys())[0]
+    secund_category = list(api_result.keys())[1]
+    third_category = list(api_result.keys())[2]
     first_value_accuracy = round(list(api_result.values())[0]*100,2)
     if first_category == 'Background without leaves':
         return "I'm sorry, I'm not able to recognize the leaf, could you feed me with another image please?"
     if first_value_accuracy > threshold:
          return "Yes! I'm fairly sure, at "+ str(first_value_accuracy) + "% that I've detected a " + first_category + "!"
     else:
-         return "MmmmmmH... I'm not quite confident, could we try again with another image please?"
+         return "MmmmmmH... I'm not quite confident. \
+                I'm hesitating between "+ first_category + ", " + secund_category + " and " + third_category+". \
+                Would you have another image to help me out?"
+
 
 def chat_with_chatgpt(prompt, model="text-davinci-003"):
     response = openai.Completion.create(
@@ -69,7 +74,7 @@ def loading_message():
     my_bar = st.progress(0, text=message_list[0])
 
     for percent_complete in range(1,100):
-        time.sleep(0.3)
+        time.sleep(0.1)
         message_id=int(percent_complete/len(message_list)+1)
         my_bar.progress(percent_complete + 1, text=message_list[message_id])
     return None
@@ -97,7 +102,7 @@ header_html = f"""
 st.markdown(
     header_html, unsafe_allow_html=True,
 )
-#st.markdown('<style>h1{color: #2D6A4F;}</style>', unsafe_allow_html=True)
+st.markdown('<style>h1{font-size: 50px;}</style>', unsafe_allow_html=True)
 # Section Drag and Drop
 st.header('Drag and Drop')
 
