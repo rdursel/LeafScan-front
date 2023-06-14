@@ -30,8 +30,10 @@ def validate_result(api_result,threshold=70):
     first_value_accuracy = round(list(api_result.values())[0]*100,2)
     if first_category == 'Background without leaves':
         return "I'm sorry, I'm not able to recognize the leaf, could you feed me with another image please?"
-    if first_value_accuracy > threshold:
-         return "Yes! I'm fairly sure, at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** ' + f' disease infos here 👉[link]({disease_info(first_category)})' + "!"
+    if first_category.endswith('ealthy') and first_value_accuracy > threshold :
+        return "Yes! I'm fairly sure, at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** '
+    if first_value_accuracy > threshold :
+         return "Yes! I'm fairly sure, at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** : ' + f' disease infos here 👉[link]({disease_info(first_category)})' + "!"
     else:
          return "MmmmmmH... I'm not quite confident, could we try again with another image please?"
 
@@ -132,7 +134,7 @@ if uploaded_files is not None:
                api_result = (response.json())
                loading_message()
                st.write(validate_result(api_result[i]))
-               if ask_chatGPT:
+               if ask_chatGPT and not (list(api_result[i].keys())[0].endswith('ealthy') or list(api_result[i].keys())[0].endswith('eaves')):
                    prompt ='What are the 3 main actions to do against ' + list(api_result[i].keys())[0] + ' disease(s)'
                    st.write('Asking to chatGPT : '+prompt )
                    st.write( chat_with_chatgpt(prompt))
