@@ -48,5 +48,3 @@ def disease_info(disease_name):
     'Tomato healthy': ''
 }
     return data_dict[disease_name]
-
-print(disease_info('Apple Cedar apple rust'))
