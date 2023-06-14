@@ -10,6 +10,7 @@ import openai
 import time
 from pathlib import Path
 import base64
+from diseases import disease_info
 
 
 #load variables
@@ -33,7 +34,7 @@ def validate_result(api_result,threshold=70):
     if first_category == 'Background without leaves':
         return "I'm sorry, I'm not able to recognize the leaf, could you feed me with another image please?"
     if first_value_accuracy > threshold:
-         return "Yes! I'm fairly sure, at "+ str(first_value_accuracy) + "% that I've detected a " + first_category + "!"
+         return "Yes! I'm fairly sure, at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** ' + f' disease infos here 👉[link]({disease_info(first_category)})' + "!"
     else:
          return "MmmmmmH... I'm not quite confident. \
                 I'm hesitating between "+ first_category + ", " + secund_category + " and " + third_category+". \
