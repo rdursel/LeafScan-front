@@ -63,16 +63,16 @@ def loading_message():
     This function display a progress bar with custom messages
     '''
     message_list = [
-            '## Setting up the API url to:  '+url + ' :male-mechanic:',
-            '## The image is sent to API... :four_leaf_clover:',
-            '## The image is rescaled to 256x256 pixels... :robot_face:',
-            '## The image is being rotated randomly to create augmented features...:feather:',
-            '## The image is now ready to be analyzed... 	:leafy_green:',
+            '## Loading image',
+            '## Guillaume is finetuning the model ... :dna:',
             '## Guillaume is finetuning the model ... :dna:',
             '## Raphaël is checking if the prediction makes sense...:passport_control:',
+            '## Raphaël is checking if the prediction makes sense...:passport_control:',
             '## Alice is looking into a dictionary about the detected disease... :leaves:',
-            '## Getting back the 3 mains probabilities from the API :first_place_medal:	:second_place_medal: 	:third_place_medal:',
-            '## Be patient, it \' coming.... :) :herb:',
+            '## Alice is looking into a dictionary about the detected disease... :leaves:',
+            '## Open a ticket.. :admission_tickets:',
+            '## Open a ticket.. :admission_tickets:',
+            '## Trust the process 	:sunglasses:',
             '## DONE ! :white_check_mark:'
         ]
 
@@ -80,7 +80,7 @@ def loading_message():
     my_bar = st.progress(0, text=message_list[0])
 
     for percent_complete in range(1,100):
-        time.sleep(0.1)
+        time.sleep(0.07)
         message_id=int(percent_complete/len(message_list)+1)
         my_bar.progress(percent_complete + 1, text=message_list[message_id])
     return None
@@ -136,11 +136,10 @@ if uploaded_files is not None:
                api_result = (response.json())
                loading_message()
                st.write(validate_result(api_result[i]))
-               if list(api_result[i].keys())[0].endswith('ealthy'):
-                   pass
-               else:
-                   ask_chatGPT = st.checkbox("chatGPT : help me to treat this disease, please :ambulance:")
-                   if ask_chatGPT and not (list(api_result[i].keys())[0].endswith('eaves')):
+
+               if not list(api_result[i].keys())[0].endswith('ealthy') and not (list(api_result[i].keys())[0].endswith('eaves')):
+                   ask_chatGPT = st.checkbox("chatGPT help me to treat this disease, please :ambulance:")
+                   if ask_chatGPT:
                     prompt ='What are the 3 main actions to do against ' + list(api_result[i].keys())[0] + ' disease(s)'
                     st.write('Asking to chatGPT : '+prompt )
                     st.write( chat_with_chatgpt(prompt))
