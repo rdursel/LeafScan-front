@@ -102,21 +102,8 @@ left_column, right_column = st.columns(2)
 #with left_column:
 
 # Titre en vert
-header_html = f"""
-            <h1 style='text-align: center; text-color:#081C15'>
-                LeafScan App
-                <img
-                    src='data:image/png;base64,{
-                        img_to_bytes(
-                            "media/icons/001-leaf.png"
-                            )}'
-                    class='img-fluid'>
-            </h1>
-                """
-st.markdown(
-    header_html, unsafe_allow_html=True,
-)
-st.markdown('<style>h1{font-size: 50px;}</style>', unsafe_allow_html=True)
+logo = Image.open('media/LeafScan-logos.png')
+st.image(logo)
 # Section Drag and Drop
 st.header('Drag and Drop')
 
