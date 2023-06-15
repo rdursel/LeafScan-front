@@ -149,11 +149,9 @@ if uploaded_files is not None:
                api_result = (response.json())
                loading_message()
                st.write(validate_result(api_result[i]))
-               if list(api_result[i].keys())[0].endswith('ealthy'):
-                   pass
-               else:
-                   ask_chatGPT = st.checkbox("chatGPT help me to treat tis disease, please :ambulance:")
-                   if ask_chatGPT and not (list(api_result[i].keys())[0].endswith('eaves')):
+               if not list(api_result[i].keys())[0].endswith('ealthy') and not (list(api_result[i].keys())[0].endswith('eaves')):
+                   ask_chatGPT = st.checkbox("chatGPT help me to treat this disease, please :ambulance:")
+                   if ask_chatGPT:
                     prompt ='What are the 3 main actions to do against ' + list(api_result[i].keys())[0] + ' disease(s)'
                     st.write('Asking to chatGPT : '+prompt )
                     st.write( chat_with_chatgpt(prompt))
