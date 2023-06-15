@@ -125,7 +125,6 @@ if uploaded_files is not None:
 
        for upld in uploaded_files:
            i=0
-
            image = Image.open(upld)
            left_co, cent_co,last_co = st.columns(3)
            with cent_co:
@@ -150,11 +149,14 @@ if uploaded_files is not None:
                api_result = (response.json())
                loading_message()
                st.write(validate_result(api_result[i]))
-               ask_chatGPT = st.checkbox("I'd like to receive chatGPT advices to treat the detected disease (if any)")
-               if ask_chatGPT and not (list(api_result[i].keys())[0].endswith('ealthy') or list(api_result[i].keys())[0].endswith('eaves')):
-                   prompt ='What are the 3 main actions to do against ' + list(api_result[i].keys())[0] + ' disease(s)'
-                   st.write('Asking to chatGPT : '+prompt )
-                   st.write( chat_with_chatgpt(prompt))
+               if list(api_result[i].keys())[0].endswith('ealthy'):
+                   pass
+               else:
+                   ask_chatGPT = st.checkbox("chatGPT help me to treat tis disease, please :ambulance:")
+                   if ask_chatGPT and not (list(api_result[i].keys())[0].endswith('eaves')):
+                    prompt ='What are the 3 main actions to do against ' + list(api_result[i].keys())[0] + ' disease(s)'
+                    st.write('Asking to chatGPT : '+prompt )
+                    st.write( chat_with_chatgpt(prompt))
            else:
                st.write("Failed to send the image to the API.")
            i=+1
