@@ -25,9 +25,9 @@ def validate_result(api_result,threshold=70):
     if first_category == 'Background without leaves':
         return "Sorry, no leaf detected.  Please try again."
     if first_category.endswith('ealthy') and first_value_accuracy > threshold :
-        return "Sure at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** '
+          return "Diagnosis:" + f' **{first_category}** '+  " ( "+ str(first_value_accuracy) +"% )"
     if first_value_accuracy > threshold :
-         return "Sure at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** : ' + f' disease infos here 👉[link]({disease_info(first_category)})' + "!"
+         return "Diagnosis:" + f' **{first_category}** '+  " ( "+ str(first_value_accuracy) +"% ) : " + f' disease infos here 👉[link]({disease_info(first_category)})' + "!"
     else:
          return f"I'm hesitating between **{first_category}**, {secund_category} and {third_category}. Please try again OR  **Most probable** disease infos here 👉[link]({disease_info(first_category)})"
 
