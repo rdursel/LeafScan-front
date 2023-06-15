@@ -62,28 +62,19 @@ def loading_message():
     This function display a progress bar with custom messages
     '''
     message_list = [
-            'Setting up the API url to:  '+url,
-            'The image is sent to API...',
-            'The image is rescaled to 256x256 pixels...',
-            'The image is being rotated randomly to create augmented features...',
-            'The image is now ready to be analyzed...',
-            'Guillaume is finetuning the model :)',
-            'Raphaël is checking if the prediction makes sense...',
-            'Alice is looking into a dictionary about the detected disease...',
-            'Getting back the 3 mains probabilities from the API',
-            'Be patient, it \' coming.... :)',
-            'DONE !'
+            '## Setting up the API url to:  '+url + ' :male-mechanic:',
+            '## The image is sent to API... :four_leaf_clover:',
+            '## The image is rescaled to 256x256 pixels... :robot_face:',
+            '## The image is being rotated randomly to create augmented features...:feather:',
+            '## The image is now ready to be analyzed... 	:leafy_green:',
+            '## Guillaume is finetuning the model ... :dna:',
+            '## Raphaël is checking if the prediction makes sense...:passport_control:',
+            '## Alice is looking into a dictionary about the detected disease... :leaves:',
+            '## Getting back the 3 mains probabilities from the API :first_place_medal:	:second_place_medal: 	:third_place_medal:',
+            '## Be patient, it \' coming.... :) :herb:',
+            '## DONE ! :white_check_mark:'
         ]
 
-    st.markdown(
-    """
-    <style>
-        .stProgress > div > div > div > div {
-            background-color: #40916C;
-        }
-    </style>""",
-    unsafe_allow_html=True,
-    )
 
     my_bar = st.progress(0, text=message_list[0])
 
@@ -93,50 +84,73 @@ def loading_message():
         my_bar.progress(percent_complete + 1, text=message_list[message_id])
     return None
 
-# #Afficher le fond vert pâle à l'aide de st.markdown()
-# st.markdown(green_background, unsafe_allow_html=True)
-
-left_column, right_column = st.columns(2)
+#left_column, right_column = st.columns(2)
 
 # Côté gauche (Drag and Drop)
 #with left_column:
+
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css?family=Comfortaa&display=swap');
+html, body [class*="css"] {
+    font-family: 'Comfortaa', sans-serif;
+    font-size: 20px !important;
+    font-weight: 200;
+    color: #091747;
+    }
+
+.stProgress > div > div > div > div {
+            background-color: #40916C;
+        }
+}
+</style>
+""", unsafe_allow_html=True)
 
 # Titre en vert
 logo = Image.open('media/LeafScan-logos.png')
 st.image(logo)
 # Section Drag and Drop
-st.header('Drag and Drop')
+#st.header('Drag and Drop')
+#st.markdown('<p class="big-font">Hello World !!</p>', unsafe_allow_html=True)
 
-uploaded_files = st.file_uploader("Choose image files", accept_multiple_files=True, type=None)
-ask_chatGPT = st.checkbox("I'd like to receive chatGPT advices to treat the detected disease (if any)")
+uploaded_files = st.file_uploader(label="Upload your leaf picture :four_leaf_clover:", accept_multiple_files=True, type=['jpg','jpeg','png','gif'])
+
 
 # Côté droit (Prédictions et images)
 #with right_column:
 
 # Titre des prédictions
-st.header('Predictions')
+#st.header('Predictions')
 if uploaded_files is not None:
 
        for upld in uploaded_files:
            i=0
 
            image = Image.open(upld)
-           st.image(image, caption=f'Uploaded Image ({image.format}).', width=200)
+           left_co, cent_co,last_co = st.columns(3)
+           with cent_co:
+               st.image(image, caption=f'Your uploaded leaf', width=400)
+
            if image.format == "PNG":
             image = image.convert("RGB")
            # convert the PIL image to byte array
            image_bytes = io.BytesIO()
-           image.save(image_bytes, format="JPEG")
-           image_bytes = image_bytes.getvalue()
 
-           # Use 'rb' if you get an error about 'bytes-like object is required, not str'
-           response = requests.post(url, files={'img': image_bytes})
+           with st.spinner('Loading your photo...'):
+                image.save(image_bytes, format="JPEG")
+                image_bytes = image_bytes.getvalue()
 
+
+           with st.spinner('Loading your photo...'):
+                response = requests.post(url, files={'img': image_bytes})
+
+           st.write('Starting the prediction process.')
            # Assuming the API responds with JSON
            if response.status_code == 200:
                api_result = (response.json())
                loading_message()
                st.write(validate_result(api_result[i]))
+               ask_chatGPT = st.checkbox("I'd like to receive chatGPT advices to treat the detected disease (if any)")
                if ask_chatGPT and not (list(api_result[i].keys())[0].endswith('ealthy') or list(api_result[i].keys())[0].endswith('eaves')):
                    prompt ='What are the 3 main actions to do against ' + list(api_result[i].keys())[0] + ' disease(s)'
                    st.write('Asking to chatGPT : '+prompt )
