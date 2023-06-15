@@ -32,18 +32,19 @@ def validate_result(api_result,threshold=70):
     third_category = list(api_result.keys())[2]
     first_value_accuracy = round(list(api_result.values())[0]*100,2)
     if first_category == 'Background without leaves':
-        return "I'm sorry, I'm not able to recognize the leaf, could you feed me with another image please?"
+        return "Sorry, no leaf detected.  Please try again."
     if first_category.endswith('ealthy') and first_value_accuracy > threshold :
-        return "Yes! I'm fairly sure, at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** '
+        return "Sure at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** '
     if first_value_accuracy > threshold :
-         return "Yes! I'm fairly sure, at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** : ' + f' disease infos here 👉[link]({disease_info(first_category)})' + "!"
+         return "Sure at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** : ' + f' disease infos here 👉[link]({disease_info(first_category)})' + "!"
     else:
-         return "MmmmmmH... I'm not quite confident. \
-                I'm hesitating between "+ first_category + ", " + secund_category + " and " + third_category+". \
-                Would you have another image to help me out?"
+         return "I'm hesitating between "+ first_category + ", " + secund_category + " and " + third_category+". Please try again."
 
 
 def chat_with_chatgpt(prompt, model="text-davinci-003"):
+    '''
+    send a prompt to chatGPT api.  Reply with a str()
+    '''
     response = openai.Completion.create(
         engine=model,
         prompt=prompt,
@@ -84,11 +85,6 @@ def loading_message():
         my_bar.progress(percent_complete + 1, text=message_list[message_id])
     return None
 
-#left_column, right_column = st.columns(2)
-
-# Côté gauche (Drag and Drop)
-#with left_column:
-
 st.markdown("""
 <style>
 @import url('https://fonts.googleapis.com/css?family=Comfortaa&display=swap');
@@ -106,21 +102,12 @@ html, body [class*="css"] {
 </style>
 """, unsafe_allow_html=True)
 
-# Titre en vert
+
 logo = Image.open('media/LeafScan-logos.png')
 st.image(logo)
-# Section Drag and Drop
-#st.header('Drag and Drop')
-#st.markdown('<p class="big-font">Hello World !!</p>', unsafe_allow_html=True)
 
 uploaded_files = st.file_uploader(label="Upload your leaf picture :four_leaf_clover:", accept_multiple_files=True, type=['jpg','jpeg','png','gif'])
 
-
-# Côté droit (Prédictions et images)
-#with right_column:
-
-# Titre des prédictions
-#st.header('Predictions')
 if uploaded_files is not None:
 
        for upld in uploaded_files:
@@ -152,7 +139,7 @@ if uploaded_files is not None:
                if list(api_result[i].keys())[0].endswith('ealthy'):
                    pass
                else:
-                   ask_chatGPT = st.checkbox("chatGPT help me to treat tis disease, please :ambulance:")
+                   ask_chatGPT = st.checkbox("chatGPT : help me to treat this disease, please :ambulance:")
                    if ask_chatGPT and not (list(api_result[i].keys())[0].endswith('eaves')):
                     prompt ='What are the 3 main actions to do against ' + list(api_result[i].keys())[0] + ' disease(s)'
                     st.write('Asking to chatGPT : '+prompt )
