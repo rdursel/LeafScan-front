@@ -98,7 +98,7 @@ if submit:
                 st.write("Failed to send the image to the API.")
             i += 1
 
-#Final test
+#Final test again
 with st.expander( 'About us', expanded=False):
     st.write('''
 
