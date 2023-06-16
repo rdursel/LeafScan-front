@@ -87,6 +87,34 @@ if submit:
                                 st.write(repGPT)
 
 
-                            else:
-                                st.write("Failed to send the image to the API.")
+                    else:
+                        st.write("Failed to send the image to the API.")
             i += 1
+
+
+with st.expander( 'About us', expanded=False):
+    st.write('''
+
+We are an innovative plant leaf detection application designed to swiftly identify plant diseases using leaf images. Our advanced machine learning and computer vision algorithms enable us to quickly detect diseases and determine the specific plant species.
+
+Features:
+
+    Tomato
+    Raspberry
+    Grapes
+    Apple
+    Cherry
+    Corn
+    Potato
+    Soybean
+    Bell Pepper
+    Strawberry
+    Orange
+    Peach
+    Blueberry
+    Squash
+
+
+Our mission is to assist gardening enthusiasts, farmers, and plant lovers in making informed decisions and protecting their crops from diseases. Download our plant leaf detection application today and confidently care for your plants!
+
+Note: Please be aware that our application is intended for informational and preliminary diagnostic purposes only. For accurate diagnoses and specific treatments, we recommend consulting an agricultural or horticultural expert.''')
