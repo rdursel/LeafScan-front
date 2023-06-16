@@ -94,8 +94,8 @@ if submit:
                         st.markdown("**Advice:**")
                         st.write(repGPT)
 
-                else:
-                    st.write("Failed to send the image to the API.")
+            else:
+                st.write("Failed to send the image to the API.")
             i += 1
 
 #Final test
