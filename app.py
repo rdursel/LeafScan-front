@@ -72,6 +72,9 @@ if submit:
                     api_result = (response.json())
                     loading_message()
                     st.write(validate_result(api_result[i]))
+                    st.text(" ")
+                    st.text(" ")
+                    st.text(" ")
 
                     if not list(api_result[i].keys())[0].endswith('ealthy') and not (list(api_result[i].keys())[0].endswith('eaves')):
                         prompt ='What are the 3 main actions to do against ' + list(api_result[i].keys())[0] + ' disease(s)'
