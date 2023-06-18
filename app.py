@@ -11,136 +11,117 @@ import time
 from pathlib import Path
 import base64
 from diseases import disease_info
-
+from test import loading_message, validate_result, chat_with_chatgpt
 
 #load variables
 BASE_URI = st.secrets['cloud_api_uri']
 url = BASE_URI + '/predict'
 OPENAI_API_KEY=st.secrets['OPENAI_API_KEY']
 
-def img_to_bytes(img_path):
-    img_bytes = Path(img_path).read_bytes()
-    encoded = base64.b64encode(img_bytes).decode()
-    return encoded
+st.markdown("""
+<style>
+@import url('https://fonts.googleapis.com/css?family=Comfortaa&display=swap');
+html, body [class*="css"] {
+    font-family: 'Comfortaa', sans-serif;
+    font-size: 26px;
+    font-weight: 300;
+    color: #091747;
+    }
 
-def validate_result(api_result,threshold=70):
-    '''
-    This function ensure a minimal score and print result
-    '''
-    first_category = list(api_result.keys())[0]
-    secund_category = list(api_result.keys())[1]
-    third_category = list(api_result.keys())[2]
-    first_value_accuracy = round(list(api_result.values())[0]*100,2)
-    if first_category == 'Background without leaves':
-        return "I'm sorry, I'm not able to recognize the leaf, could you feed me with another image please?"
-    if first_category.endswith('ealthy') and first_value_accuracy > threshold :
-        return "Yes! I'm fairly sure, at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** '
-    if first_value_accuracy > threshold :
-         return "Yes! I'm fairly sure, at "+ str(first_value_accuracy) + "% that I've detected a " + f' **{first_category}** : ' + f' disease infos here 👉[link]({disease_info(first_category)})' + "!"
-    else:
-         return "MmmmmmH... I'm not quite confident. \
-                I'm hesitating between "+ first_category + ", " + secund_category + " and " + third_category+". \
-                Would you have another image to help me out?"
+.css-10trblm  {
+            font-size: 80 px !important;
+            font-weight: bold;
+        }
 
 
-def chat_with_chatgpt(prompt, model="text-davinci-003"):
-    response = openai.Completion.create(
-        engine=model,
-        prompt=prompt,
-        max_tokens=100,
-        n=1,
-        stop=None,
-        temperature=0.5,
-    )
-
-    message = response.choices[0].text.strip()
-    return message
-
-
-def loading_message():
-    '''
-    This function display a progress bar with custom messages
-    '''
-    message_list = [
-            'Setting up the API url to:  '+url,
-            'The image is sent to API...',
-            'The image is rescaled to 256x256 pixels...',
-            'The image is being rotated randomly to create augmented features...',
-            'The image is now ready to be analyzed...',
-            'Guillaume is finetuning the model :)',
-            'Raphaël is checking if the prediction makes sense...',
-            'Alice is looking into a dictionary about the detected disease...',
-            'Getting back the 3 mains probabilities from the API',
-            'Be patient, it \' coming.... :)',
-            'DONE !'
-        ]
-
-    st.markdown(
-    """
-    <style>
-        .stProgress > div > div > div > div {
+.stProgress > div > div > div > div {
             background-color: #40916C;
         }
-    </style>""",
-    unsafe_allow_html=True,
-    )
+}
+</style>
+""", unsafe_allow_html=True)
 
-    my_bar = st.progress(0, text=message_list[0])
 
-    for percent_complete in range(1,100):
-        time.sleep(0.1)
-        message_id=int(percent_complete/len(message_list)+1)
-        my_bar.progress(percent_complete + 1, text=message_list[message_id])
-    return None
-
-# #Afficher le fond vert pâle à l'aide de st.markdown()
-# st.markdown(green_background, unsafe_allow_html=True)
-
-left_column, right_column = st.columns(2)
-
-# Côté gauche (Drag and Drop)
-#with left_column:
-
-# Titre en vert
 logo = Image.open('media/LeafScan-logos.png')
 st.image(logo)
-# Section Drag and Drop
-st.header('Drag and Drop')
 
-uploaded_files = st.file_uploader("Choose image files", accept_multiple_files=True, type=None)
-ask_chatGPT = st.checkbox("I'd like to receive chatGPT advices to treat the detected disease (if any)")
+uploaded_files = st.file_uploader(label="Upload your leaf picture :four_leaf_clover:", accept_multiple_files=True, type=['jpg','jpeg','png','gif'])
 
-# Côté droit (Prédictions et images)
-#with right_column:
+submit = st.button('Launch the scan')
+if submit:
+    if uploaded_files is not None:
 
-# Titre des prédictions
-st.header('Predictions')
-if uploaded_files is not None:
+        for upld in uploaded_files:
+            i = 0
+            image = Image.open(upld)
+            #left_co, cent_co,last_co = st.columns(3)
+            #with cent_co:
+            st.image(image, width=400)
+            # st.image(image, caption=f'Your uploaded leaf', width=400)
+            if image.format == "PNG":
+                image = image.convert("RGB")
+            # convert the PIL image to byte array
+            image_bytes = io.BytesIO()
 
-       for upld in uploaded_files:
-           i=0
+            with st.spinner('Loading your photo...'):
+                image.save(image_bytes, format="JPEG")
+                image_bytes = image_bytes.getvalue()
 
-           image = Image.open(upld)
-           st.image(image, caption=f'Uploaded Image ({image.format}).', width=200)
-           if image.format == "PNG":
-            image = image.convert("RGB")
-           # convert the PIL image to byte array
-           image_bytes = io.BytesIO()
-           image.save(image_bytes, format="JPEG")
-           image_bytes = image_bytes.getvalue()
 
-           # Use 'rb' if you get an error about 'bytes-like object is required, not str'
-           response = requests.post(url, files={'img': image_bytes})
+            with st.spinner('Sending your photo...'):
+                response = requests.post(url, files={'img': image_bytes})
 
-           # Assuming the API responds with JSON
-           if response.status_code == 200:
-               api_result = (response.json())
-               loading_message()
-               st.write(validate_result(api_result[i]))
-               if ask_chatGPT and not (list(api_result[i].keys())[0].endswith('ealthy') or list(api_result[i].keys())[0].endswith('eaves')):
-                   prompt ='What are the 3 main actions to do against ' + list(api_result[i].keys())[0] + ' disease(s)'
-                   st.write('Asking to chatGPT : '+prompt )
-                   st.write( chat_with_chatgpt(prompt))
-           else:
-               st.write("Failed to send the image to the API.")
-           i=+1
+            # st.write('Starting the prediction process.')
+            # Assuming the API responds with JSON
+
+            if response.status_code == 200:
+                api_result = (response.json())
+                loading_message()
+                col1, col2, col3 = st.columns([1, 3, 1])
+                with col2:
+                    st.write("<br>", unsafe_allow_html=True)
+                    st.markdown(f'# {validate_result(api_result[i])}')
+                st.write("<br><br>", unsafe_allow_html=True)
+                st.text(" ")
+                st.text(" ")
+
+                if not list(api_result[i].keys())[0].endswith('ealthy') and not (list(api_result[i].keys())[0].endswith('eaves')):
+                    prompt ='What are the 3 main actions to do against ' + list(api_result[i].keys())[0] + ' disease(s)'
+                    repGPT = chat_with_chatgpt(prompt)
+
+                    container = st.container()
+                    with container:
+                        st.markdown("**Advice:**")
+                        st.write(repGPT)
+
+            else:
+                st.write("Failed to send the image to the API.")
+            i += 1
+
+#Final test again
+with st.expander( 'About us', expanded=False):
+    st.write('''
+
+We are an innovative plant leaf detection application designed to swiftly identify plant diseases using leaf images. Our advanced machine learning and computer vision algorithms enable us to quickly detect diseases and determine the specific plant species.
+
+Features:
+
+    Tomato
+    Raspberry
+    Grapes
+    Apple
+    Cherry
+    Corn
+    Potato
+    Soybean
+    Bell Pepper
+    Strawberry
+    Orange
+    Peach
+    Blueberry
+    Squash
+
+
+Our mission is to assist gardening enthusiasts, farmers, and plant lovers in making informed decisions and protecting their crops from diseases. Download our plant leaf detection application today and confidently care for your plants!
+
+Note: Please be aware that our application is intended for informational and preliminary diagnostic purposes only. For accurate diagnoses and specific treatments, we recommend consulting an agricultural or horticultural expert.''')
